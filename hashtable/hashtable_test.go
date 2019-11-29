@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/gouthamve/mvcc_array/hashtable"
+	"github.com/blastbao/go-mvcc-hashmap/hashtable"
 )
 
 func TestInit(t *testing.T) {

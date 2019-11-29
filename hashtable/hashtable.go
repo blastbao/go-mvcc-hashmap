@@ -6,11 +6,12 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/gouthamve/mvcc_array/linkedlist"
+	"github.com/blastbao/go-mvcc-hashmap/linkedlist"
 )
 
 // Hashtable implements a cuckoo hashing based table
 type Hashtable struct {
+
 	size     int
 	maxReach int
 
@@ -39,16 +40,20 @@ type KVType struct {
 	Val ValType
 }
 
+
+//
 func newHT(size, maxReach int) *Hashtable {
+
+
 	h := Hashtable{
 		size:     size,
 		maxReach: maxReach,
 	}
 
+
 	h.values = make([]*linkedlist.LinkedList, size)
 	for i := range h.values {
 		h.values[i] = &linkedlist.LinkedList{}
-
 		h.insert(0, &KVType{}, i)
 	}
 
@@ -81,14 +86,20 @@ func (h *Hashtable) insert(txn uint64, kv *KVType, idx int) error {
 // Put puts the kv into the hashtable
 // ANNY: This is the key part. See how the rollback happens
 func (h *Hashtable) Put(kv KVType) error {
+
+
 	h.Lock()
 	defer h.Unlock()
+
+
 	// NOTE: The rollback will be via the abandoning of the txn
 	txn := atomic.AddUint64(&h.txnCtr, 1)
 	current := &kv
 	idxMod := make([]int, h.maxReach)
 
 	for i := 0; i < h.maxReach; i++ {
+
+
 		idx := h.hash1(current.Key)
 		temp := (*KVType)(h.values[idx].Head())
 		if (*temp == KVType{}) {
@@ -109,6 +120,7 @@ func (h *Hashtable) Put(kv KVType) error {
 		h.insert(txn, current, idx)
 		idxMod[i] = idx
 		current = temp
+
 	}
 	// Abandon the txn
 	// Delete the elements of the current txn
@@ -121,8 +133,7 @@ func (h *Hashtable) Put(kv KVType) error {
 
 // Get gets the keyvalue pair back
 func (h *Hashtable) Get(k KeyType) (bool, ValType) {
-	// NOTE: Make this serialised when we deal with mulitple
-	// writers
+	// NOTE: Make this serialised when we deal with mulitple writers
 	version := h.lsTxn
 
 	idx := h.hash1(k)

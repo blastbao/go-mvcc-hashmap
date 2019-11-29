@@ -8,7 +8,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/gouthamve/mvcc_array/linkedlist"
+
+	"github.com/blastbao/go-mvcc-hashmap/linkedlist"
 )
 
 func TestInitial(t *testing.T) {
